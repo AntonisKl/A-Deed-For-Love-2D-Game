@@ -1,0 +1,11 @@
+tree("Root")
+	parallel
+		updateDistances
+		tree("Companion")
+
+tree("Companion")
+	repeat
+		fallback
+			Attack
+			Chase
+			FollowPlayer

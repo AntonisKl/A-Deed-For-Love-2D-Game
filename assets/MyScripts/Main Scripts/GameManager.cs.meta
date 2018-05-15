@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 60ec7c18a42b2fb4faef3db779a00a9d
+timeCreated: 1519138354
+licenseType: Free
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - backgroundClip: {fileID: 8300000, guid: ce1350c7a33cdd4448035fca0d31891a, type: 3}
+  - introClip: {fileID: 8300000, guid: 22bb44a039974f34c9c0aff69e183ac1, type: 3}
+  - menuClip: {fileID: 8300000, guid: 3ddf64e93cbbc094ca48ac8ecf694322, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

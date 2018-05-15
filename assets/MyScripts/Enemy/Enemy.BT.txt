@@ -1,0 +1,11 @@
+tree("Root")
+	parallel
+		updateDistance
+		tree("Enemy")
+
+tree("Enemy")
+	repeat
+		fallback
+			Attack
+			Chase
+			Idle
