@@ -1,0 +1,6 @@
+City: Thorton
+Main Character: Enion Hollinger
+Companion: Adelard Maximos
+Final Boss: Cergar (Orc)
+King: Ricardus Van Vlissingen
+King's daughter: Elvina Haessler
