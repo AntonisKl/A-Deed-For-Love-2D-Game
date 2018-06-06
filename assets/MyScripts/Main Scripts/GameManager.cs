@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
 
         player = (GameObject) Resources.Load("Characters/Player");
         AI = (GameObject) Resources.Load("Characters/AI");
-        floor = (GameObject) Resources.Load("Misc/Floor");
+        floor = (GameObject) Resources.Load("Map/Floor");
         key = (GameObject) Resources.Load("Misc/Key");
         healthPickup = (GameObject) Resources.Load("Misc/Health Pickup");
         enemy = (GameObject) Resources.Load("Characters/Enemy");
