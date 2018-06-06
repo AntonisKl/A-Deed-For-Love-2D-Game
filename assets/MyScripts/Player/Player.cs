@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
+
 public class Player : MonoBehaviour {
 
     Animator animator;
     public float health, DPS, maxHealth;
     public bool canDealDamage, inputEnabled;
+    public static Stats playerStats;
 
     // Use this for initialization
     void Start () {

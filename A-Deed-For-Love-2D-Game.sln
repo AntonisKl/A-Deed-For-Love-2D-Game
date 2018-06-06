@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A-Deed-For-Love-2D-Game", "Assembly-CSharp.csproj", "{F6C1312A-64E7-0AE0-DA92-BFA187C67911}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A-Deed-For-Love-2D-Game", "Assembly-CSharp-Editor.csproj", "{5A54C8BB-E723-C10B-1C57-E04DACBF656D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6C1312A-64E7-0AE0-DA92-BFA187C67911}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6C1312A-64E7-0AE0-DA92-BFA187C67911}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6C1312A-64E7-0AE0-DA92-BFA187C67911}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6C1312A-64E7-0AE0-DA92-BFA187C67911}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A54C8BB-E723-C10B-1C57-E04DACBF656D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A54C8BB-E723-C10B-1C57-E04DACBF656D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A54C8BB-E723-C10B-1C57-E04DACBF656D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A54C8BB-E723-C10B-1C57-E04DACBF656D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
