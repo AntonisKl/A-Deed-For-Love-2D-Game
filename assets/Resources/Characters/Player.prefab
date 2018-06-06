@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 95623410151853638}
   - component: {fileID: 50417090244955290}
   - component: {fileID: 114684225636334170}
-  - component: {fileID: 60700378047996048}
+  - component: {fileID: 58313028740412094}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -110,8 +110,8 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 1
---- !u!60 &60700378047996048
-PolygonCollider2D:
+--- !u!58 &58313028740412094
+CircleCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -123,21 +123,8 @@ PolygonCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.3, y: 0.52}
-    newSize: {x: 0.3, y: 0.52}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: -0.14999999, y: -0.26}
-      - {x: 0.14999999, y: -0.26}
-      - {x: 0.14999999, y: 0.26}
-      - {x: -0.14999999, y: 0.26}
+  serializedVersion: 2
+  m_Radius: 0.27
 --- !u!95 &95623410151853638
 Animator:
   serializedVersion: 3
@@ -170,7 +157,7 @@ MonoBehaviour:
   DPS: 8
   maxHealth: 0
   canDealDamage: 0
-  inputEnabled: 0
+  inputEnabled: 1
 --- !u!114 &114745349330020150
 MonoBehaviour:
   m_ObjectHideFlags: 1
