@@ -1,2 +1,0 @@
-2017.1.0f3:2.2.0.0
-StandaloneWindows64
