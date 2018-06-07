@@ -21,7 +21,7 @@ public class showTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 	}
 
 	public void OnPointerEnter(PointerEventData pointerEventData){
-		tooltipPanel = (GameObject)Instantiate(Resources.Load("UI/tooltipPanel"));
+		tooltipPanel = (GameObject)Instantiate(Resources.Load("Character Creation/tooltipPanel"));
 		tooltipPanel.transform.SetParent(MainUI.transform, false);
 		tooltipPanel.transform.position = Input.mousePosition + offset;
 		tooltipPanel.GetComponentInChildren<Text>().fontSize = 70;
