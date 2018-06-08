@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
-using System.Collections.Generic;       //Allows us to use Lists. 
+using System.Collections.Generic; //Allows us to use Lists. 
 using UnityEngine.SceneManagement;
 using Pathfinding;
 using System.Linq;
@@ -10,13 +9,16 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public static GameObject player, AI, floor, key, canvas, pausePanel, healthPickup, enemy;
+    private static Sprite[] floorTiles;
     public static GameObject[] enemies;
     public static Text playerHealthText, companionHeathText, keysCollectedText;
     GameObject resumeButton;
     GameObject exitButton;
     public AudioClip backgroundClip, introClip, menuClip;
 
-    public static GameManager instance = null;              //Static instance of GameManager which allows it to be accessed by any other script.
+    public static GameManager
+        instance = null; //Static instance of GameManager which allows it to be accessed by any other script.
+
     static int keysCollected = 0;
     static List<List<GridNode>> regions;
     static int MapWidth;
@@ -26,7 +28,7 @@ public class GameManager : MonoBehaviour
     static int level = 0;
     static GridNode keyNode = null;
     static bool setOnClick = false;
-    static string[] states = { "walkingLeft", "walkingRight", "walkingDown", "walkingUp", "idle" };
+    static string[] states = {"walkingLeft", "walkingRight", "walkingDown", "walkingUp", "idle"};
 
     //Awake is always called before any Start functions
     void Awake()
@@ -43,6 +45,7 @@ public class GameManager : MonoBehaviour
         player = (GameObject) Resources.Load("Characters/Player");
         AI = (GameObject) Resources.Load("Characters/AI");
         floor = (GameObject) Resources.Load("Map/Floor");
+        floorTiles = Resources.LoadAll<Sprite>("Map/Floor");
         key = (GameObject) Resources.Load("Misc/Key");
         healthPickup = (GameObject) Resources.Load("Misc/Health Pickup");
         enemy = (GameObject) Resources.Load("Characters/Enemy");
@@ -126,6 +129,7 @@ public class GameManager : MonoBehaviour
                 enemy.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezePosition;
                 enemy.GetComponent<Animator>().speed = 0;
             }
+
             setOnClick = true;
         }
         else
@@ -144,7 +148,6 @@ public class GameManager : MonoBehaviour
                     enemy.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
                     enemy.GetComponent<Animator>().speed = 0;
                 }
-
             }
             else
             {
@@ -298,6 +301,7 @@ public class GameManager : MonoBehaviour
                     break;
                 }
             }
+
             if (!stop)
                 minY++;
         }
@@ -313,7 +317,7 @@ public class GameManager : MonoBehaviour
                     minX = node.XCoordinateInGrid;
             }
 
-            
+
             p = Instantiate(player, new Vector3(minX, minY + 1, 0), Quaternion.identity);
             if (companionHealth > 0)
             {
@@ -330,7 +334,7 @@ public class GameManager : MonoBehaviour
                 if (node.ZCoordinateInGrid == minY && node.XCoordinateInGrid > maxX)
                     maxX = node.XCoordinateInGrid;
             }
-            
+
             p = Instantiate(player, new Vector3(maxX, minY + 1, 0), Quaternion.identity);
             if (companionHealth > 0)
             {
@@ -338,6 +342,7 @@ public class GameManager : MonoBehaviour
                 ai.GetComponentInChildren<MeshRenderer>().sortingOrder = 2;
             }
         }
+
         // hook the camera to the player
         GameObject.FindGameObjectWithTag("MainCamera").transform.parent = p.transform;
         GameObject.FindGameObjectWithTag("MainCamera").transform.localPosition = new Vector3(0, 0, -1);
@@ -358,18 +363,19 @@ public class GameManager : MonoBehaviour
 
             for (int j = y - 1; j >= 0; j--)
             {
-                Vector3 _position = new Vector3((float)(x), (float)(j), 0);
+                Vector3 _position = new Vector3((float) (x), (float) (j), 0);
 
                 // destroy the wall tile first
                 Destroy(mapTiles[MapWidth * j + x]);
 
                 // instantiate the floor tile
                 GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+                floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
 
                 if (j == 0) // if it is the downmost node
                 {
                     // spawn player and companion
-                    
+
                     _position.y++;
                     GameObject p = Instantiate(player, _position, Quaternion.identity);
                     GameObject.FindGameObjectWithTag("MainCamera").transform.parent = p.transform;
@@ -391,13 +397,14 @@ public class GameManager : MonoBehaviour
 
         for (int j = y + 1; j < MapHeight; j++)
         {
-            Vector3 _position = new Vector3((float)(x), (float)(j), 0);
+            Vector3 _position = new Vector3((float) (x), (float) (j), 0);
 
             // destroy the wall tile first
             Destroy(mapTiles[MapWidth * j + x]);
 
             // instantiate the floor tile
             GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+            floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
 
             if (j == MapHeight - 1) // if it is the upmost node
             {
@@ -448,13 +455,15 @@ public class GameManager : MonoBehaviour
                 if (continueX)
                 {
                     x += stepX;
-                    if (GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().mpHandler.Map[x, y] == 1) // if it is a wall
+                    if (GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().mpHandler.Map[x, y] ==
+                        1) // if it is a wall
                     {
-                        Vector3 _position = new Vector3((float)(x), (float)(y), 0);
+                        Vector3 _position = new Vector3((float) (x), (float) (y), 0);
 
                         // make the wall tile a floor tile
                         Destroy(mapTiles[MapWidth * y + x]);
-                        Instantiate(floor, _position, Quaternion.identity);
+                        Instantiate(floor, _position, Quaternion.identity).GetComponent<SpriteRenderer>().sprite =
+                            floorTiles[Random.Range(0, floorTiles.Length)];
                     }
                 }
 
@@ -463,10 +472,11 @@ public class GameManager : MonoBehaviour
                     y += stepY;
                     if (GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().mpHandler.Map[x, y] == 1)
                     {
-                        Vector3 _position = new Vector3((float)(x), (float)(y), 0);
+                        Vector3 _position = new Vector3((float) (x), (float) (y), 0);
 
                         Destroy(mapTiles[MapWidth * y + x]);
-                        Instantiate(floor, _position, Quaternion.identity);
+                        Instantiate(floor, _position, Quaternion.identity).GetComponent<SpriteRenderer>().sprite =
+                            floorTiles[Random.Range(0, floorTiles.Length)];
                     }
                 }
             }
@@ -483,9 +493,10 @@ public class GameManager : MonoBehaviour
             // by default spawns the key in a random node in the first walkable region
             randNum = Random.Range(0, regions[1].Count);
             keyNode = regions[1][randNum];
-            Vector3 _position = new Vector3(regions[1][randNum].XCoordinateInGrid, regions[1][randNum].ZCoordinateInGrid, 0);
+            Vector3 _position = new Vector3(regions[1][randNum].XCoordinateInGrid,
+                regions[1][randNum].ZCoordinateInGrid, 0);
             int min = 9999;
-            
+
             // if there are more than 1 walkable regions find the smallest one and keep the coordinates of its last node
             for (int i = 2; i < regions.Count; i++)
             {
@@ -493,9 +504,10 @@ public class GameManager : MonoBehaviour
                 {
                     min = regions[i].Count;
                     keyNode = regions[i].Last();
-                    _position = new Vector3(regions[i].Last().XCoordinateInGrid, regions[i].Last().ZCoordinateInGrid, 0);
+                    _position = new Vector3(regions[i].Last().XCoordinateInGrid, regions[i].Last().ZCoordinateInGrid,
+                        0);
                 }
-            }    
+            }
 
             // spawn key
             Instantiate(key, _position, Quaternion.identity);
@@ -503,7 +515,7 @@ public class GameManager : MonoBehaviour
     }
 
     static void spawnEnemies()
-    { 
+    {
         int randNum, randNum1;
         int enemiesNum = Random.Range(1, level);
         // spawn an enemy next to the key (if it exists)
@@ -518,7 +530,8 @@ public class GameManager : MonoBehaviour
                     // spawn enemy
                     if (keysCollected < 2)
                     {
-                        GameObject e = Instantiate(enemy, new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0), Quaternion.identity);
+                        GameObject e = Instantiate(enemy,
+                            new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0), Quaternion.identity);
                         /*e.tag = "Enemy";
                         e.AddComponent<Enemy>();
                         e.GetComponent<Animator>().runtimeAnimatorController = (RuntimeAnimatorController)Resources.Load("Enemy AI");*/
@@ -536,16 +549,19 @@ public class GameManager : MonoBehaviour
                     }
                     else // spawn boss
                     {
-                        GameObject e = Instantiate(enemy, new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0), Quaternion.identity);
-                        
+                        GameObject e = Instantiate(enemy,
+                            new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0), Quaternion.identity);
+
                         e.transform.localScale = new Vector3(2, 2, 1);
-                        e.GetComponent<Animator>().runtimeAnimatorController = (RuntimeAnimatorController) Resources.Load("Animations/Enemy/FinalBossAnimator");
+                        e.GetComponent<Animator>().runtimeAnimatorController =
+                            (RuntimeAnimatorController) Resources.Load("Animations/Enemy/FinalBossAnimator");
 
                         e.GetComponent<Enemy>().tendency_to_chase_player = 1.5f; // big tendency to chase player
                         e.GetComponent<Enemy>().health = 150;
                         e.GetComponent<Enemy>().DPS = 10;
                         e.GetComponent<AIPath>().maxSpeed = 1.75f;
                     }
+
                     break;
                 }
             }
@@ -567,7 +583,8 @@ public class GameManager : MonoBehaviour
             GridNode node = regions[randNum][randNum1];
             float randNumFloat = Random.Range(0.1f, 1.5f);
             // spawn enemy
-            GameObject e = Instantiate(enemy, new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0), Quaternion.identity);
+            GameObject e = Instantiate(enemy, new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0),
+                Quaternion.identity);
 
             int rNum = Random.Range(1, 100);
             // 50-50 chance for the enemy to be ranged or melee
@@ -580,7 +597,6 @@ public class GameManager : MonoBehaviour
             else
                 e.GetComponent<Enemy>().tendency_to_chase_player = randNumFloat; // random tendency to chase player
         }
-        
     }
 
     static void spawnPickups()
@@ -604,7 +620,8 @@ public class GameManager : MonoBehaviour
             }
 
             // spawn pickup
-            GameObject hP = Instantiate(healthPickup, new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0), Quaternion.identity);
+            GameObject hP = Instantiate(healthPickup, new Vector3(node.XCoordinateInGrid, node.ZCoordinateInGrid, 0),
+                Quaternion.identity);
             hP.GetComponent<HealthPickup>().health = level + Random.Range(8, 15);
         }
     }

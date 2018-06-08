@@ -2,15 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using Pathfinding;
-
 using System.Linq;
 using UnityEngine.SceneManagement;
 
 public class CellAuto : MonoBehaviour
 {
-
     public GameObject floor;
     public GameObject wall;
+    private Sprite[] floorTiles;
 
     public int MapWidth = 60;
     public int MapHeight = 60;
@@ -30,15 +29,23 @@ public class CellAuto : MonoBehaviour
         mpHandler.MakeCaverns(firstLoopIterations, secondLoopIterations); // number of iterations
         //for (int i = 0; i < 30; i++) regions.Add(new List<GridNode>());
         // mpHandler.PrintMap();
+
+        floorTiles = Resources.LoadAll<Sprite>("Map/Floor");
         for (int j = 0; j < mpHandler.MapHeight; j++)
         {
             for (int i = 0; i < mpHandler.MapWidth; i++)
             {
-                Vector3 _position = new Vector3((float)(i), (float)(j), 0);
+                Vector3 _position = new Vector3((float) (i /*0.16*/), (float) (j /*0.16*/), 0);
 
                 if (mpHandler.Map[i, j] == 0)
                 {
-                    Instantiate(floor, _position, Quaternion.identity);
+                    GameObject floorInstance = Instantiate(floor, _position, Quaternion.identity);
+                    floorInstance.GetComponent<SpriteRenderer>().sprite =
+                        floorTiles[Random.Range(0, floorTiles.Length)];
+                    
+//                    floorInstance.GetComponent<SpriteRenderer>().siz
+
+                    Debug.Log("SIZE OF TILE: " + floor.transform.localScale);
                 }
                 else if (mpHandler.Map[i, j] == 1)
                 {
@@ -48,7 +55,7 @@ public class CellAuto : MonoBehaviour
         }
 
         AstarPath.active.Scan();
-        getGridData();              // can get node data of logic path map - including all separate regions - see GridNode List above
+        getGridData(); // can get node data of logic path map - including all separate regions - see GridNode List above
 
         GameManager.createLevel();
 
@@ -68,13 +75,14 @@ public class CellAuto : MonoBehaviour
         // get all regions using gn.Area variable which indicates the index of each region (0,1,2,...) (the first one in regions list is the unwalkable region)
         foreach (GridNode gn in mynodes)
         {
-            if (!values.Contains((int)gn.Area)) // if it is a new region
+            if (!values.Contains((int) gn.Area)) // if it is a new region
             {
-                values.Add((int)gn.Area);
+                values.Add((int) gn.Area);
                 regions.Add(new List<GridNode>());
             }
+
             // add node to region
-            regions[(int)gn.Area].Add(gn);
+            regions[(int) gn.Area].Add(gn);
         }
     }
 }
