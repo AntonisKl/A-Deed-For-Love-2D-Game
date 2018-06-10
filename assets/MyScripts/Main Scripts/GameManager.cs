@@ -8,8 +8,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameObject player, AI, floor, key, canvas, pausePanel, healthPickup, enemy;
-    private static Sprite[] floorTiles;
+    public static GameObject player, AI, floor, wall, key, canvas, pausePanel, healthPickup, enemy;
+    private static Sprite[] floorTiles, wallTiles;
     public static GameObject[] enemies;
     public static Text playerHealthText, companionHeathText, keysCollectedText;
     GameObject resumeButton;
@@ -44,8 +44,10 @@ public class GameManager : MonoBehaviour
 
         player = (GameObject) Resources.Load("Characters/Player");
         AI = (GameObject) Resources.Load("Characters/AI");
-        floor = (GameObject) Resources.Load("Map/Floor");
+        floor = (GameObject) Resources.Load("Map/Floor/Floor");
         floorTiles = Resources.LoadAll<Sprite>("Map/Floor");
+        wall = (GameObject) Resources.Load("Map/Wall/Wall");
+        wallTiles = Resources.LoadAll<Sprite>("Map/Wall");
         key = (GameObject) Resources.Load("Misc/Key");
         healthPickup = (GameObject) Resources.Load("Misc/Health Pickup");
         enemy = (GameObject) Resources.Load("Characters/Enemy");
@@ -266,6 +268,7 @@ public class GameManager : MonoBehaviour
         MapWidth = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().MapWidth;
         MapHeight = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().MapHeight;
 
+        createEdgeWalls();
         // create exits (and spawn player and his companion), connect the regions and spawn the key with a certain probability
         createExits();
 
@@ -346,6 +349,25 @@ public class GameManager : MonoBehaviour
         // hook the camera to the player
         GameObject.FindGameObjectWithTag("MainCamera").transform.parent = p.transform;
         GameObject.FindGameObjectWithTag("MainCamera").transform.localPosition = new Vector3(0, 0, -1);
+    }
+
+    // this function changes sprites of wall tiles that are above walkable floor tiles in order to make the map more realistic
+    static void createEdgeWalls()
+    {
+        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+        
+        foreach (GridNode node in regions[0])
+        {
+            int x = node.XCoordinateInGrid;
+            int y = node.ZCoordinateInGrid;
+            if (y - 1 >= 0)
+            {
+                GameObject tileBelow = mapTiles[(y - 1) * MapWidth +x];
+                if (tileBelow.layer == 8)
+                    mapTiles[MapWidth * y + x].GetComponent<SpriteRenderer>().sprite =
+                        wallTiles[Random.Range(0, wallTiles.Length)];
+            }
+        }
     }
 
     // this function creates 2 exits for the main rooms and 1 for the starting room
