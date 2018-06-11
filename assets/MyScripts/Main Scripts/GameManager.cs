@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameObject player, AI, floor, wall, key, canvas, pausePanel, healthPickup, enemy;
     private static Sprite[] floorTiles, wallTiles;
+    private static Sprite cornerWallTile;
     public static GameObject[] enemies;
     public static Text playerHealthText, companionHeathText, keysCollectedText;
     GameObject resumeButton;
@@ -48,6 +49,7 @@ public class GameManager : MonoBehaviour
         floorTiles = Resources.LoadAll<Sprite>("Map/Floor");
         wall = (GameObject) Resources.Load("Map/Wall/Wall");
         wallTiles = Resources.LoadAll<Sprite>("Map/Wall");
+        cornerWallTile = Resources.Load<Sprite>("Map/Corner/Triangle");
         key = (GameObject) Resources.Load("Misc/Key");
         healthPickup = (GameObject) Resources.Load("Misc/Health Pickup");
         enemy = (GameObject) Resources.Load("Characters/Enemy");
@@ -268,7 +270,7 @@ public class GameManager : MonoBehaviour
         MapWidth = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().MapWidth;
         MapHeight = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().MapHeight;
 
-        createEdgeWalls();
+//        createEdgeWalls();
         // create exits (and spawn player and his companion), connect the regions and spawn the key with a certain probability
         createExits();
 
@@ -352,20 +354,129 @@ public class GameManager : MonoBehaviour
     }
 
     // this function changes sprites of wall tiles that are above walkable floor tiles in order to make the map more realistic
-    static void createEdgeWalls()
+    public static void createEdgeWalls()
     {
-        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+        regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
+//        Debug.Log("REGIONS COUNT INSIDE CREATE EDGE WALLS: " + regions.Count);
+//        Debug.Log("NODES COUNT INSIDE REGION[0] INSIDE CREATE EDGE WALLS: " + regions[0].Count);
         
+        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+//        Debug.Log("MAPTILES COUNT AFTER: " + mapTiles.Length);
+
+        int x, y;
+
         foreach (GridNode node in regions[0])
         {
-            int x = node.XCoordinateInGrid;
-            int y = node.ZCoordinateInGrid;
+            x = node.XCoordinateInGrid;
+            y = node.ZCoordinateInGrid;
             if (y - 1 >= 0)
             {
-                GameObject tileBelow = mapTiles[(y - 1) * MapWidth +x];
+                GameObject tileBelow = mapTiles[(y - 1) * MapWidth + x];
                 if (tileBelow.layer == 8)
                     mapTiles[MapWidth * y + x].GetComponent<SpriteRenderer>().sprite =
                         wallTiles[Random.Range(0, wallTiles.Length)];
+            }
+        }
+
+        GameObject currWallTile;
+        foreach (GridNode node in regions[0])
+        {
+            x = node.XCoordinateInGrid;
+            y = node.ZCoordinateInGrid;
+
+            currWallTile = mapTiles[y * MapWidth + x];
+//            Debug.Log("CURRENT WALL TILE COORDINATES: " + x + ", " + y);
+
+            if (x + 1 < MapWidth && y - 1 >= 0)
+                // +-   +: wall, -: floor
+                // --
+            {
+                GameObject tileBelow = mapTiles[(y - 1) * MapWidth + x];
+                GameObject tileRight = mapTiles[y * MapWidth + (x + 1)];
+                GameObject tileDownRight = mapTiles[(y - 1) * MapWidth + (x + 1)];
+
+                if (tileBelow.layer == 8 && tileRight.layer == 8 && tileDownRight.layer == 8)
+                {
+                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
+
+                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
+                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
+                    currWallTile.AddComponent<PolygonCollider2D>();
+                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+
+                    currWallTile.gameObject.transform.Rotate(0, 0, -90);
+                }
+            }
+
+            if (x + 1 < MapWidth && y + 1 < MapHeight)
+                // --
+                // +-
+            {
+                GameObject tileUp = mapTiles[(y + 1) * MapWidth + x];
+                GameObject tileRight = mapTiles[y * MapWidth + (x + 1)];
+                GameObject tileUpRight = mapTiles[(y + 1) * MapWidth + (x + 1)];
+
+                if (tileUp.layer == 8 && tileRight.layer == 8 && tileUpRight.layer == 8)
+                {
+                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
+
+                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
+                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
+                    currWallTile.AddComponent<PolygonCollider2D>();
+                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+//                    currWallTile.gameObject.transform.Rotate(0, 0, 180);
+                }
+            }
+
+            if (x - 1 >= 0 && y - 1 >= 0)
+                // -+
+                // --
+            {
+                GameObject tileLeft = mapTiles[y * MapWidth + (x - 1)];
+                GameObject tileDown = mapTiles[(y - 1) * MapWidth + x];
+                GameObject tileDownLeft = mapTiles[(y - 1) * MapWidth + (x - 1)];
+
+                if (tileLeft.layer == 8 && tileDown.layer == 8 && tileDownLeft.layer == 8)
+                {
+                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
+
+                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
+                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
+                    currWallTile.AddComponent<PolygonCollider2D>();
+                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+//                    Debug.Log("PASSED");
+
+                    currWallTile.gameObject.transform.Rotate(0, 0, 180);
+                }
+            }
+
+            if (x - 1 >= 0 && y + 1 < MapHeight)
+                // --
+                // -+
+            {
+                GameObject tileLeft = mapTiles[y * MapWidth + (x - 1)];
+                GameObject tileUp = mapTiles[(y + 1) * MapWidth + x];
+                GameObject tileUpLeft = mapTiles[(y + 1) * MapWidth + (x - 1)];
+
+                if (tileLeft.layer == 8 && tileUp.layer == 8 && tileUpLeft.layer == 8)
+                {
+                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
+
+                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
+                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
+                    currWallTile.AddComponent<PolygonCollider2D>();
+                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+
+                    currWallTile.gameObject.transform.Rotate(0, 0, 90);
+                }
             }
         }
     }
@@ -374,6 +485,8 @@ public class GameManager : MonoBehaviour
     static void createExits()
     {
         GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+        Debug.Log("MAPTILES COUNT BEFORE: " + mapTiles.Length);
+
 
         int x, y;
 

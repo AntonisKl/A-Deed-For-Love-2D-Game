@@ -42,10 +42,10 @@ public class CellAuto : MonoBehaviour
                     GameObject floorInstance = Instantiate(floor, _position, Quaternion.identity);
                     floorInstance.GetComponent<SpriteRenderer>().sprite =
                         floorTiles[Random.Range(0, floorTiles.Length)];
-                    
+
 //                    floorInstance.GetComponent<SpriteRenderer>().siz
 
-                    Debug.Log("SIZE OF TILE: " + floor.transform.localScale);
+//                    Debug.Log("SIZE OF TILE: " + floor.transform.localScale);
                 }
                 else if (mpHandler.Map[i, j] == 1)
                 {
@@ -60,6 +60,11 @@ public class CellAuto : MonoBehaviour
         GameManager.createLevel();
 
         AstarPath.active.Scan();
+
+        getGridData(); // can get node data of logic path map - including all separate regions - see GridNode List above
+        Debug.Log("REGIONS COUNT: " + regions.Count);
+        Debug.Log("NODES COUNT INSIDE REGION[0] CREATE EDGE WALLS: " + regions[0].Count);
+        GameManager.createEdgeWalls();
     }
 
 
