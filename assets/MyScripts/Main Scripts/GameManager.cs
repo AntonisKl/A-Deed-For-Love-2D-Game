@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     public static GameObject player, AI, floor, wall, key, canvas, pausePanel, healthPickup, enemy;
     private static Sprite[] floorTiles, wallTiles;
     private static Sprite cornerWallTile;
-    public static GameObject[] enemies;
+    public static GameObject[] enemies, mapTiles;
     public static Text playerHealthText, companionHeathText, keysCollectedText;
     GameObject resumeButton;
     GameObject exitButton;
@@ -281,6 +281,9 @@ public class GameManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "main")
         {
             connectRegions();
+//            AstarPath.active.Scan();
+//            GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().getGridData();
+//            smoothMap();
             spawnKey();
             spawnPickups();
             spawnEnemies();
@@ -290,6 +293,12 @@ public class GameManager : MonoBehaviour
             // if it is the starting room create one door/exit and spawn player and his companion
             spawnPlayer();
         }
+
+        
+        AstarPath.active.Scan();
+        GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().getGridData();
+        createEdgeWalls();
+//        smoothMap();
     }
 
     // this function is used only at the starting room for spawning the player
@@ -366,6 +375,11 @@ public class GameManager : MonoBehaviour
             GameObject first = (GameObject) x;
             GameObject second = (GameObject) y;
 
+            if (first == null)
+                return 1;
+            if (second == null)
+                return -1;
+
             int compareXValue = myComparer.Compare((int) first.transform.position.x, (int) second.transform.position.x);
             int compareYValue = myComparer.Compare((int) first.transform.position.y, (int) second.transform.position.y);
 
@@ -401,14 +415,15 @@ public class GameManager : MonoBehaviour
     }
 
     // this function changes sprites of wall tiles that are above walkable floor tiles in order to make the map more realistic
-    public static void createEdgeWalls()
+    static void createEdgeWalls()
     {
         regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
+        mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 //        Debug.Log("REGIONS COUNT INSIDE CREATE EDGE WALLS: " + regions.Count);
 //        Debug.Log("NODES COUNT INSIDE REGION[0] INSIDE CREATE EDGE WALLS: " + regions[0].Count);
 
-        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
-        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
+
+//        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
 
         IComparer myComparer = new MapTilesComparer();
 
@@ -416,11 +431,11 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("MAP TILES COUNT: " + mapTiles.Length);
 
-        foreach (var tile in mapTiles)
-        {
-            Debug.Log("Tile: x-> " + tile.transform.position.x + ", y-> " + tile.transform.position.y + ", LAYER: " +
-                      tile.layer);
-        }
+//        foreach (var tile in mapTiles)
+//        {
+//            Debug.Log("Tile: x-> " + tile.transform.position.x + ", y-> " + tile.transform.position.y + ", LAYER: " +
+//                      tile.layer);
+//        }
 
 //        Debug.Log("MAPTILES COUNT AFTER: " + mapTiles.Length);
 
@@ -439,6 +454,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
+
+        bool changed;
         GameObject currWallTile;
         foreach (GridNode node in regions[0])
         {
@@ -448,6 +465,7 @@ public class GameManager : MonoBehaviour
             currWallTile = mapTiles[y * MapWidth + x];
             Debug.Log("CURRENT WALL TILE COORDINATES: " + x + ", " + y);
 
+            changed = false;
             if (x + 1 < MapWidth && y - 1 >= 0)
                 // +-   +: wall, -: floor
                 // --
@@ -472,10 +490,11 @@ public class GameManager : MonoBehaviour
                     currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
 
                     currWallTile.gameObject.transform.Rotate(0, 0, -90);
+                    changed = true;
                 }
             }
 
-            if (x + 1 < MapWidth && y + 1 < MapHeight)
+            if (x + 1 < MapWidth && y + 1 < MapHeight && changed == false)
                 // --
                 // +-
             {
@@ -497,10 +516,11 @@ public class GameManager : MonoBehaviour
                     currWallTile.GetComponent<BoxCollider2D>().enabled = false;
                     currWallTile.AddComponent<PolygonCollider2D>();
                     currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+                    changed = true;
                 }
             }
 
-            if (x - 1 >= 0 && y - 1 >= 0)
+            if (x - 1 >= 0 && y - 1 >= 0 && changed == false)
                 // -+
                 // --
             {
@@ -525,10 +545,11 @@ public class GameManager : MonoBehaviour
 //                    Debug.Log("PASSED");
 
                     currWallTile.gameObject.transform.Rotate(0, 0, 180);
+                    changed = true;
                 }
             }
 
-            if (x - 1 >= 0 && y + 1 < MapHeight)
+            if (x - 1 >= 0 && y + 1 < MapHeight && changed == false)
                 // --
                 // -+
             {
@@ -551,7 +572,77 @@ public class GameManager : MonoBehaviour
                     currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
 
                     currWallTile.gameObject.transform.Rotate(0, 0, 90);
+                    changed = true;
                 }
+            }
+        }
+    }
+
+    // need optimization for finding neighbours: a for loop for all the adjacent nodes
+    static void smoothMap()
+    {
+        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+
+        int floorTilesNum, x, y;
+        foreach (GridNode node in regions[0])
+        {
+            x = node.XCoordinateInGrid;
+            y = node.ZCoordinateInGrid;
+
+            floorTilesNum = 0;
+
+            if (x + 1 < MapWidth)
+            {
+                if (mapTiles[y * MapWidth + (x + 1)].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (x - 1 >= 0)
+            {
+                if (mapTiles[y * MapWidth + (x - 1)] && mapTiles[y * MapWidth + (x - 1)].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (y + 1 < MapHeight)
+            {
+                if (mapTiles[(y + 1) * MapWidth + x] && mapTiles[(y + 1) * MapWidth + x].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (y - 1 >= 0)
+            {
+                if (mapTiles[(y - 1) * MapWidth + x] && mapTiles[(y - 1) * MapWidth + x].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (x + 1 < MapWidth && y + 1 < MapHeight)
+            {
+                if (mapTiles[(y + 1) * MapWidth + (x + 1)] && mapTiles[(y + 1) * MapWidth + (x + 1)].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (x - 1 >= 0 && y + 1 < MapHeight)
+            {
+                if (mapTiles[(y + 1) * MapWidth + (x - 1)] && mapTiles[(y + 1) * MapWidth + (x - 1)].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (x + 1 < MapWidth && y - 1 >= 0)
+            {
+                if (mapTiles[(y - 1) * MapWidth + (x + 1)] && mapTiles[(y - 1) * MapWidth + (x + 1)].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (x - 1 >= 0 && y - 1 >= 0)
+            {
+                if (mapTiles[(y - 1) * MapWidth + (x - 1)] && mapTiles[(y - 1) * MapWidth + (x - 1)].layer == 8)
+                    floorTilesNum++;
+            }
+
+            if (floorTilesNum >= 6)
+            {
+                DestroyImmediate(mapTiles[y * MapWidth + x]);
+                Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
             }
         }
     }
@@ -559,7 +650,7 @@ public class GameManager : MonoBehaviour
     // this function creates 2 exits for the main rooms and 1 for the starting room
     static void createExits()
     {
-        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+        mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 //        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
 //        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
 
@@ -643,7 +734,7 @@ public class GameManager : MonoBehaviour
     // this functions connects regions by creating tunnels between each pair of them
     static void connectRegions()
     {
-        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+        mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 //        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
 //        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
 

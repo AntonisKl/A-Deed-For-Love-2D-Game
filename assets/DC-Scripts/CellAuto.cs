@@ -61,16 +61,17 @@ public class CellAuto : MonoBehaviour
 
         GameManager.createLevel();
 
-        AstarPath.active.Scan();
-
-        getGridData(); // can get node data of logic path map - including all separate regions - see GridNode List above
+//        AstarPath.active.Scan();
+//
+//        getGridData(); // can get node data of logic path map - including all separate regions - see GridNode List above
         Debug.Log("REGIONS COUNT: " + regions.Count);
         Debug.Log("NODES COUNT INSIDE REGION[0] CREATE EDGE WALLS: " + regions[0].Count);
-        GameManager.createEdgeWalls();
+//        GameManager.createEdgeWalls();
+//        GameManager.
     }
 
 
-    void getGridData()
+    public void getGridData()
     {
         myGraphs = AstarPath.active.data.gridGraph;
         GridNode[] mynodes = myGraphs.nodes;
