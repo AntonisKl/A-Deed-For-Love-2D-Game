@@ -39,8 +39,9 @@ public class CellAuto : MonoBehaviour
 
                 if (mpHandler.Map[i, j] == 0)
                 {
-                    GameObject floorInstance = Instantiate(floor, _position, Quaternion.identity);
-                    floorInstance.GetComponent<SpriteRenderer>().sprite =
+                    GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+                    floorTile.GetComponent<SpriteRenderer>().sprite =
                         floorTiles[Random.Range(0, floorTiles.Length)];
 
 //                    floorInstance.GetComponent<SpriteRenderer>().siz
@@ -49,7 +50,8 @@ public class CellAuto : MonoBehaviour
                 }
                 else if (mpHandler.Map[i, j] == 1)
                 {
-                    Instantiate(wall, _position, Quaternion.identity);
+                    GameObject wallTile = Instantiate(wall, _position, Quaternion.identity);
+                    wallTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
                 }
             }
         }

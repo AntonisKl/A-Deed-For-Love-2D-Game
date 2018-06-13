@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
-using System.Collections.Generic; //Allows us to use Lists. 
+using System.Collections.Generic;
+using System.Globalization;
+//Allows us to use Lists. 
 using UnityEngine.SceneManagement;
 using Pathfinding;
 using System.Linq;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -353,14 +357,71 @@ public class GameManager : MonoBehaviour
         GameObject.FindGameObjectWithTag("MainCamera").transform.localPosition = new Vector3(0, 0, -1);
     }
 
+    public class MapTilesComparer : IComparer
+    {
+        // Call CaseInsensitiveComparer.Compare with the parameters reversed.
+        public int Compare(object x, object y)
+        {
+            Comparer myComparer = new Comparer(CultureInfo.CurrentCulture);
+            GameObject first = (GameObject) x;
+            GameObject second = (GameObject) y;
+
+            int compareXValue = myComparer.Compare((int) first.transform.position.x, (int) second.transform.position.x);
+            int compareYValue = myComparer.Compare((int) first.transform.position.y, (int) second.transform.position.y);
+
+            if (compareXValue < 0 && compareYValue < 0)
+                return -1;
+
+            if (compareXValue > 0 && compareYValue > 0)
+                return 1;
+
+            if (compareXValue == 0 && compareYValue == 0)
+                return 0;
+
+            if (compareXValue < 0 && compareYValue > 0)
+                return 1;
+
+            if (compareXValue > 0 && compareYValue < 0)
+                return -1;
+
+            if (compareXValue == 0 && compareYValue > 0)
+                return 1;
+
+            if (compareXValue == 0 && compareYValue < 0)
+                return -1;
+
+            if (compareXValue < 0 && compareYValue == 0)
+                return -1;
+
+            if (compareXValue > 0 && compareYValue == 0)
+                return 1;
+
+            return 0;
+        }
+    }
+
     // this function changes sprites of wall tiles that are above walkable floor tiles in order to make the map more realistic
     public static void createEdgeWalls()
     {
         regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
 //        Debug.Log("REGIONS COUNT INSIDE CREATE EDGE WALLS: " + regions.Count);
 //        Debug.Log("NODES COUNT INSIDE REGION[0] INSIDE CREATE EDGE WALLS: " + regions[0].Count);
-        
-        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+
+        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
+        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
+
+        IComparer myComparer = new MapTilesComparer();
+
+        Array.Sort(mapTiles, myComparer);
+
+        Debug.Log("MAP TILES COUNT: " + mapTiles.Length);
+
+        foreach (var tile in mapTiles)
+        {
+            Debug.Log("Tile: x-> " + tile.transform.position.x + ", y-> " + tile.transform.position.y + ", LAYER: " +
+                      tile.layer);
+        }
+
 //        Debug.Log("MAPTILES COUNT AFTER: " + mapTiles.Length);
 
         int x, y;
@@ -385,7 +446,7 @@ public class GameManager : MonoBehaviour
             y = node.ZCoordinateInGrid;
 
             currWallTile = mapTiles[y * MapWidth + x];
-//            Debug.Log("CURRENT WALL TILE COORDINATES: " + x + ", " + y);
+            Debug.Log("CURRENT WALL TILE COORDINATES: " + x + ", " + y);
 
             if (x + 1 < MapWidth && y - 1 >= 0)
                 // +-   +: wall, -: floor
@@ -397,7 +458,11 @@ public class GameManager : MonoBehaviour
 
                 if (tileBelow.layer == 8 && tileRight.layer == 8 && tileDownRight.layer == 8)
                 {
+                    Debug.Log("1");
+
                     GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
                     floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
 
@@ -420,7 +485,11 @@ public class GameManager : MonoBehaviour
 
                 if (tileUp.layer == 8 && tileRight.layer == 8 && tileUpRight.layer == 8)
                 {
+                    Debug.Log("2");
+
                     GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
                     floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
 
@@ -428,7 +497,6 @@ public class GameManager : MonoBehaviour
                     currWallTile.GetComponent<BoxCollider2D>().enabled = false;
                     currWallTile.AddComponent<PolygonCollider2D>();
                     currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
-//                    currWallTile.gameObject.transform.Rotate(0, 0, 180);
                 }
             }
 
@@ -442,7 +510,11 @@ public class GameManager : MonoBehaviour
 
                 if (tileLeft.layer == 8 && tileDown.layer == 8 && tileDownLeft.layer == 8)
                 {
+                    Debug.Log("3");
+
                     GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
                     floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
 
@@ -466,7 +538,10 @@ public class GameManager : MonoBehaviour
 
                 if (tileLeft.layer == 8 && tileUp.layer == 8 && tileUpLeft.layer == 8)
                 {
+                    Debug.Log("4");
                     GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
                     floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
 
@@ -485,8 +560,13 @@ public class GameManager : MonoBehaviour
     static void createExits()
     {
         GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
-        Debug.Log("MAPTILES COUNT BEFORE: " + mapTiles.Length);
+//        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
+//        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
 
+        Debug.Log("MAPTILES COUNT BEFORE: " + mapTiles.Length);
+        IComparer myComparer = new MapTilesComparer();
+
+        Array.Sort(mapTiles, myComparer);
 
         int x, y;
 
@@ -500,12 +580,17 @@ public class GameManager : MonoBehaviour
             {
                 Vector3 _position = new Vector3((float) (x), (float) (j), 0);
 
+                int index = mapTiles[MapWidth * j + x].transform.GetSiblingIndex();
+
                 // destroy the wall tile first
-                Destroy(mapTiles[MapWidth * j + x]);
+                DestroyImmediate(mapTiles[MapWidth * j + x]);
 
                 // instantiate the floor tile
                 GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+                floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
                 floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+//                floorTile.transform.SetSiblingIndex(index);
 
                 if (j == 0) // if it is the downmost node
                 {
@@ -534,12 +619,16 @@ public class GameManager : MonoBehaviour
         {
             Vector3 _position = new Vector3((float) (x), (float) (j), 0);
 
+            int index = mapTiles[MapWidth * j + x].transform.GetSiblingIndex();
             // destroy the wall tile first
-            Destroy(mapTiles[MapWidth * j + x]);
+            DestroyImmediate(mapTiles[MapWidth * j + x]);
 
             // instantiate the floor tile
             GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+            floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
             floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+//            floorTile.transform.SetSiblingIndex(index);
 
             if (j == MapHeight - 1) // if it is the upmost node
             {
@@ -555,6 +644,12 @@ public class GameManager : MonoBehaviour
     static void connectRegions()
     {
         GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+//        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
+//        Array.Copy(GameObject.FindGameObjectsWithTag("Tile"), mapTiles, MapWidth * MapHeight);
+
+        IComparer myComparer = new MapTilesComparer();
+        Array.Sort(mapTiles, myComparer);
+
         int startX, startY, endX, endY, x, y, stepX, stepY;
         bool continueX, continueY;
         // connect regions pair by pair
@@ -590,28 +685,44 @@ public class GameManager : MonoBehaviour
                 if (continueX)
                 {
                     x += stepX;
-                    if (GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().mpHandler.Map[x, y] ==
-                        1) // if it is a wall
+                    if (mapTiles[MapWidth * y + x])
                     {
-                        Vector3 _position = new Vector3((float) (x), (float) (y), 0);
+                        if (mapTiles[MapWidth * y + x].layer == 9) // if it is a wall
+                        {
+                            Vector3 _position = new Vector3((float) (x), (float) (y), 0);
 
-                        // make the wall tile a floor tile
-                        Destroy(mapTiles[MapWidth * y + x]);
-                        Instantiate(floor, _position, Quaternion.identity).GetComponent<SpriteRenderer>().sprite =
-                            floorTiles[Random.Range(0, floorTiles.Length)];
+                            int index = mapTiles[MapWidth * y + x].transform.GetSiblingIndex();
+                            // make the wall tile a floor tile
+                            DestroyImmediate(mapTiles[MapWidth * y + x]);
+                            GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+                            floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
+
+                            floorTile.GetComponent<SpriteRenderer>().sprite =
+                                floorTiles[Random.Range(0, floorTiles.Length)];
+//                        floorTile.transform.SetSiblingIndex(index);
+                        }
                     }
                 }
 
                 if (continueY)
                 {
                     y += stepY;
-                    if (GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().mpHandler.Map[x, y] == 1)
+                    if (mapTiles[MapWidth * y + x])
                     {
-                        Vector3 _position = new Vector3((float) (x), (float) (y), 0);
+                        if (mapTiles[MapWidth * y + x].layer == 9)
+                        {
+                            Vector3 _position = new Vector3((float) (x), (float) (y), 0);
 
-                        Destroy(mapTiles[MapWidth * y + x]);
-                        Instantiate(floor, _position, Quaternion.identity).GetComponent<SpriteRenderer>().sprite =
-                            floorTiles[Random.Range(0, floorTiles.Length)];
+                            int index = mapTiles[MapWidth * y + x].transform.GetSiblingIndex();
+                            DestroyImmediate(mapTiles[MapWidth * y + x]);
+                            GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
+                            floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
+                            floorTile.GetComponent<SpriteRenderer>().sprite =
+                                floorTiles[Random.Range(0, floorTiles.Length)];
+//                        floorTile.transform.SetSiblingIndex(index);
+                        }
                     }
                 }
             }
