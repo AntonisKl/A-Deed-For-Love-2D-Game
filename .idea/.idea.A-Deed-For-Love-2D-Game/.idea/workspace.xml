@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c86c6642-312e-4ac1-9216-dde83f1ba924" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/assets/MyScripts/Main Scripts/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/assets/MyScripts/Main Scripts/GameManager.cs" afterDir="false" />
-    </list>
+    <list default="true" id="c86c6642-312e-4ac1-9216-dde83f1ba924" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,8 +14,8 @@
       <file leaf-file-name="GameManager.cs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/assets/MyScripts/Main Scripts/GameManager.cs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="30" column="18" selection-start-line="30" selection-start-column="18" selection-end-line="30" selection-end-column="18" />
+            <state relative-caret-position="510">
+              <caret line="80" column="11" selection-start-line="80" selection-start-column="11" selection-end-line="80" selection-end-column="11" />
               <folding>
                 <marker date="1536420924167" expanded="false" signature="6:277" ph="..." />
                 <marker date="1536420924167" expanded="true" signature="319:36868" ph="{...}" />
@@ -504,12 +502,12 @@
       <workItem from="1536351600216" duration="243000" />
       <workItem from="1536392929349" duration="9074000" />
       <workItem from="1536403178079" duration="79000" />
-      <workItem from="1536420610726" duration="314000" />
+      <workItem from="1536420610726" duration="944000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26904000" />
+    <option name="totallyTimeSpent" value="27534000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -522,7 +520,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="right" id="Errors In Solution" order="3" />
@@ -2064,8 +2061,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/assets/MyScripts/Main Scripts/GameManager.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="30" column="18" selection-start-line="30" selection-start-column="18" selection-end-line="30" selection-end-column="18" />
+        <state relative-caret-position="510">
+          <caret line="80" column="11" selection-start-line="80" selection-start-column="11" selection-end-line="80" selection-end-column="11" />
           <folding>
             <marker date="1536420924167" expanded="false" signature="6:277" ph="..." />
             <marker date="1536420924167" expanded="true" signature="319:36868" ph="{...}" />
