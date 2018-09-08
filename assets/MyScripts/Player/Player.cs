@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        health = GameManager.playerHealth;
+        health = GameManager.instance.playerHealth;
         maxHealth = 100;
         animator = GetComponent<Animator>();
         canDealDamage = false;
@@ -28,7 +28,7 @@ public class Player : MonoBehaviour {
             Destroy(gameObject);
         }
 
-        GameManager.playerHealth = health;
+        GameManager.instance.playerHealth = health;
 
         if (inputEnabled)
         {

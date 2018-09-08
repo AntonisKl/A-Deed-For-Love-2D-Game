@@ -39,7 +39,7 @@ public class CellAuto : MonoBehaviour
 
                 if (mpHandler.Map[i, j] == 0)
                 {
-                    GameManager.createFloorTile(i, j);
+                    GameManager.instance.createFloorTile(i, j);
 
 //                    floorInstance.GetComponent<SpriteRenderer>().siz
 
@@ -56,7 +56,7 @@ public class CellAuto : MonoBehaviour
         AstarPath.active.Scan();
         getGridData(); // can get node data of logic path map - including all separate regions - see GridNode List above
 
-        GameManager.createLevel();
+        GameManager.instance.createLevel();
 
 //        AstarPath.active.Scan();
 //

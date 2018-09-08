@@ -12,30 +12,29 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameObject player, AI, floor, wall, key, canvas, pausePanel, healthPickup, enemy;
-    private static Sprite[] floorTiles, wallTiles;
-    private static Material wallMaterial;
-    private static Material floorMaterial;
-    private static Sprite cornerWallTile;
-    public static GameObject[] enemies, mapTiles;
-    public static Text playerHealthText, companionHeathText, keysCollectedText;
+    public GameObject player, AI, floor, wall, key, canvas, pausePanel, healthPickup, enemy;
+    private  Sprite[] floorTiles, wallTiles;
+    private  Material wallMaterial;
+    private  Material floorMaterial;
+    private  Sprite cornerWallTile;
+    public  GameObject[] enemies, mapTiles;
+    public  Text playerHealthText, companionHeathText, keysCollectedText;
     GameObject resumeButton;
     GameObject exitButton;
     public AudioClip backgroundClip, introClip, menuClip;
 
-    public static GameManager
-        instance = null; //Static instance of GameManager which allows it to be accessed by any other script.
+    public static GameManager instance = null; //Static instance of GameManager which allows it to be accessed by any other script.
 
-    static int keysCollected = 0;
-    static List<List<GridNode>> regions;
-    static int MapWidth;
-    static int MapHeight;
-    public static float playerHealth = 100;
-    public static float companionHealth = 50;
-    static int level = 0;
-    static GridNode keyNode = null;
-    static bool setOnClick = false;
-    static string[] states = {"walkingLeft", "walkingRight", "walkingDown", "walkingUp", "idle"};
+     int keysCollected = 0;
+     List<List<GridNode>> regions;
+     int MapWidth;
+     int MapHeight;
+    public  float playerHealth = 100;
+    public  float companionHealth = 50;
+     int level = 0;
+     GridNode keyNode = null;
+     bool setOnClick = false;
+     string[] states = {"walkingLeft", "walkingRight", "walkingDown", "walkingUp", "idle"};
 
     //Awake is always called before any Start functions
     void Awake()
@@ -213,7 +212,7 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
-    public static void changeLevel()
+    public  void changeLevel()
     {
         if (keysCollected < 3)
         {
@@ -225,12 +224,12 @@ public class GameManager : MonoBehaviour
             Initiate.Fade("end", Color.black, 1);
     }
 
-    public static void addKey()
+    public  void addKey()
     {
         keysCollected++;
     }
 
-    public static int getLevel()
+    public  int getLevel()
     {
         return level;
     }
@@ -272,7 +271,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public static void createLevel()
+    public  void createLevel()
     {
         regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
         MapWidth = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().MapWidth;
@@ -319,7 +318,7 @@ public class GameManager : MonoBehaviour
     }
 
     // this function is used only at the starting room for spawning the player
-    static void spawnPlayer()
+     void spawnPlayer()
     {
         float randNum = Random.Range(1, 100);
         int minY = 0;
@@ -432,7 +431,7 @@ public class GameManager : MonoBehaviour
     }
 
     // this function changes sprites of wall tiles that are above walkable floor tiles in order to make the map more realistic
-    static void createEdgeWalls()
+     void createEdgeWalls()
     {
 //        Debug.Log("REGIONS COUNT INSIDE CREATE EDGE WALLS: " + regions.Count);
 //        Debug.Log("NODES COUNT INSIDE REGION[0] INSIDE CREATE EDGE WALLS: " + regions[0].Count);
@@ -535,7 +534,7 @@ public class GameManager : MonoBehaviour
                 {
                     GameObject floorTile = createFloorTile(x, y);
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
-                    
+
 //                    Debug.Log("PASSED");
                     currWallTile = createCornerWallTile(currWallTile);
 
@@ -565,7 +564,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    static GameObject createCornerWallTile(GameObject currWallTile)
+     GameObject createCornerWallTile(GameObject currWallTile)
     {
         currWallTile.GetComponent<BoxCollider2D>().enabled = false;
         currWallTile.GetComponent<PolygonCollider2D>().enabled = true;
@@ -576,7 +575,7 @@ public class GameManager : MonoBehaviour
     }
 
     // need optimization for finding neighbours: a for loop for all the adjacent nodes
-    static void smoothMap()
+     void smoothMap()
     {
 //        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 
@@ -652,7 +651,7 @@ public class GameManager : MonoBehaviour
     }
 
     // this function creates 2 exits for the main rooms and 1 for the starting room
-    static void createExits()
+     void createExits()
     {
         mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 //        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
@@ -731,7 +730,7 @@ public class GameManager : MonoBehaviour
     }
 
     // this functions connects regions by creating tunnels between each pair of them
-    static void connectRegions()
+     void connectRegions()
     {
         mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 //        GameObject[] mapTiles = new GameObject[MapWidth * MapHeight];
@@ -809,7 +808,7 @@ public class GameManager : MonoBehaviour
     }
 
     // this function spawns the key in the smallest region with probability 80%
-    static void spawnKey()
+     void spawnKey()
     {
         GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
         int randNum = Random.Range(1, 100);
@@ -839,7 +838,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    static void spawnEnemies()
+     void spawnEnemies()
     {
         int randNum, randNum1;
         int enemiesNum = Random.Range(1, level);
@@ -924,7 +923,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    static void spawnPickups()
+     void spawnPickups()
     {
         int healthPickupsNum = Random.Range(1, level + 2);
         for (int i = 0; i < healthPickupsNum; i++)
@@ -951,7 +950,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public static GameObject createFloorTile(float x, float y)
+    public  GameObject createFloorTile(float x, float y)
     {
         GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
         floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];

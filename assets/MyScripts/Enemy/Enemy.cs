@@ -21,8 +21,8 @@ public class Enemy : MonoBehaviour {
     void Awake()
     {
         NPC = gameObject;
-        health = 70 + (GameManager.getLevel() * Random.Range(5, 10));
-        DPS = GameManager.getLevel() + Random.Range(1, 4);
+        health = 70 + (GameManager.instance.getLevel() * Random.Range(5, 10));
+        DPS = GameManager.instance.getLevel() + Random.Range(1, 4);
     }
 
     // Use this for initialization

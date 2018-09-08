@@ -29,7 +29,7 @@ public class Companion : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        health = GameManager.companionHealth;
+        health = GameManager.instance.companionHealth;
         maxHealth = 50;
         DPS = 3;
 
@@ -47,7 +47,7 @@ public class Companion : MonoBehaviour
     {
         if (health <= 0)
             Destroy(gameObject);
-        GameManager.companionHealth = health;
+        GameManager.instance.companionHealth = health;
     }
 
     IEnumerator displayHints()

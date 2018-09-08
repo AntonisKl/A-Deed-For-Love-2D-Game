@@ -9,7 +9,7 @@ public class Key : MonoBehaviour {
         if (collider.gameObject.tag == "Player" || collider.gameObject.tag == "AI")
         {
             // key is taken
-            GameManager.addKey();
+            GameManager.instance.addKey();
             Destroy(gameObject);
         }
     }
