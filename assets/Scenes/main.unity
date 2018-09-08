@@ -655,7 +655,7 @@ MonoBehaviour:
   wall: {fileID: 1451127270173076, guid: a0f3d0f1a2cb06042b31c9c1e653467a, type: 2}
   MapWidth: 64
   MapHeight: 64
-  PercentAreWalls: 45
+  PercentAreWalls: 49
   firstLoopIterations: 4
   secondLoopIterations: 3
 --- !u!4 &2080128900
