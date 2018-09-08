@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameObject player, AI, floor, wall, key, canvas, pausePanel, healthPickup, enemy;
     private static Sprite[] floorTiles, wallTiles;
+    private static Material wallMaterial;
+    private static Material floorMaterial;
     private static Sprite cornerWallTile;
     public static GameObject[] enemies, mapTiles;
     public static Text playerHealthText, companionHeathText, keysCollectedText;
@@ -51,9 +53,11 @@ public class GameManager : MonoBehaviour
         AI = (GameObject) Resources.Load("Characters/AI");
         floor = (GameObject) Resources.Load("Map/Floor/Floor");
         floorTiles = Resources.LoadAll<Sprite>("Map/Floor");
+        floorMaterial = Resources.Load<Material>("Map/Floor/sand1Mat");
         wall = (GameObject) Resources.Load("Map/Wall/Wall");
-        wallTiles = Resources.LoadAll<Sprite>("Map/Wall");
-        cornerWallTile = Resources.Load<Sprite>("Map/Corner/Triangle");
+        wallTiles = Resources.LoadAll<Sprite>("Map/Wall/Edge wall sprites");
+        wallMaterial = Resources.Load<Material>("Map/Wall/Material and sprite/wallMat");
+        cornerWallTile = Resources.Load<Sprite>("Map/Wall/Corner/Triangle");
         key = (GameObject) Resources.Load("Misc/Key");
         healthPickup = (GameObject) Resources.Load("Misc/Health Pickup");
         enemy = (GameObject) Resources.Load("Characters/Enemy");
@@ -294,9 +298,22 @@ public class GameManager : MonoBehaviour
             spawnPlayer();
         }
 
-        
+
         AstarPath.active.Scan();
         GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().getGridData();
+        // smooth out corners
+        for (int i = 0; i < 4; i++)
+        {
+            regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
+            mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+            smoothMap();
+        }
+
+        AstarPath.active.Scan();
+        GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().getGridData();
+        regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
+        mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+
         createEdgeWalls();
 //        smoothMap();
     }
@@ -368,7 +385,7 @@ public class GameManager : MonoBehaviour
 
     public class MapTilesComparer : IComparer
     {
-        // Call CaseInsensitiveComparer.Compare with the parameters reversed.
+        // Compare function for ordering map tiles according to their position on the map (bottom left->bottom right->bottom + 1 left -> bottom + 1 right ...)
         public int Compare(object x, object y)
         {
             Comparer myComparer = new Comparer(CultureInfo.CurrentCulture);
@@ -417,8 +434,6 @@ public class GameManager : MonoBehaviour
     // this function changes sprites of wall tiles that are above walkable floor tiles in order to make the map more realistic
     static void createEdgeWalls()
     {
-        regions = GameObject.FindGameObjectWithTag("Map").GetComponent<CellAuto>().regions;
-        mapTiles = GameObject.FindGameObjectsWithTag("Tile");
 //        Debug.Log("REGIONS COUNT INSIDE CREATE EDGE WALLS: " + regions.Count);
 //        Debug.Log("NODES COUNT INSIDE REGION[0] INSIDE CREATE EDGE WALLS: " + regions[0].Count);
 
@@ -429,7 +444,7 @@ public class GameManager : MonoBehaviour
 
         Array.Sort(mapTiles, myComparer);
 
-        Debug.Log("MAP TILES COUNT: " + mapTiles.Length);
+//        Debug.Log("MAP TILES COUNT: " + mapTiles.Length);
 
 //        foreach (var tile in mapTiles)
 //        {
@@ -449,8 +464,10 @@ public class GameManager : MonoBehaviour
             {
                 GameObject tileBelow = mapTiles[(y - 1) * MapWidth + x];
                 if (tileBelow.layer == 8)
-                    mapTiles[MapWidth * y + x].GetComponent<SpriteRenderer>().sprite =
-                        wallTiles[Random.Range(0, wallTiles.Length)];
+                {
+                    mapTiles[MapWidth * y + x].GetComponent<SpriteRenderer>().sprite = wallTiles[Random.Range(0, wallTiles.Length)];
+                    mapTiles[MapWidth * y + x].GetComponent<SpriteRenderer>().material = wallMaterial;
+                }
             }
         }
 
@@ -463,7 +480,7 @@ public class GameManager : MonoBehaviour
             y = node.ZCoordinateInGrid;
 
             currWallTile = mapTiles[y * MapWidth + x];
-            Debug.Log("CURRENT WALL TILE COORDINATES: " + x + ", " + y);
+//            Debug.Log("CURRENT WALL TILE COORDINATES: " + x + ", " + y);
 
             changed = false;
             if (x + 1 < MapWidth && y - 1 >= 0)
@@ -476,18 +493,12 @@ public class GameManager : MonoBehaviour
 
                 if (tileBelow.layer == 8 && tileRight.layer == 8 && tileDownRight.layer == 8)
                 {
-                    Debug.Log("1");
-
-                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
-                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    GameObject floorTile = createFloorTile(x, y);
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
 
-                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
-                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
-                    currWallTile.AddComponent<PolygonCollider2D>();
-                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+//                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
+                    currWallTile = createCornerWallTile(currWallTile);
+
 
                     currWallTile.gameObject.transform.Rotate(0, 0, -90);
                     changed = true;
@@ -504,18 +515,10 @@ public class GameManager : MonoBehaviour
 
                 if (tileUp.layer == 8 && tileRight.layer == 8 && tileUpRight.layer == 8)
                 {
-                    Debug.Log("2");
-
-                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
-                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    GameObject floorTile = createFloorTile(x, y);
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
 
-                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
-                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
-                    currWallTile.AddComponent<PolygonCollider2D>();
-                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+                    currWallTile = createCornerWallTile(currWallTile);
                     changed = true;
                 }
             }
@@ -530,19 +533,11 @@ public class GameManager : MonoBehaviour
 
                 if (tileLeft.layer == 8 && tileDown.layer == 8 && tileDownLeft.layer == 8)
                 {
-                    Debug.Log("3");
-
-                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
-                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    GameObject floorTile = createFloorTile(x, y);
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
-
-                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
-                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
-                    currWallTile.AddComponent<PolygonCollider2D>();
-                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+                    
 //                    Debug.Log("PASSED");
+                    currWallTile = createCornerWallTile(currWallTile);
 
                     currWallTile.gameObject.transform.Rotate(0, 0, 180);
                     changed = true;
@@ -559,17 +554,9 @@ public class GameManager : MonoBehaviour
 
                 if (tileLeft.layer == 8 && tileUp.layer == 8 && tileUpLeft.layer == 8)
                 {
-                    Debug.Log("4");
-                    GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
-                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-                    floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                    GameObject floorTile = createFloorTile(x, y);
                     floorTile.GetComponent<SpriteRenderer>().sortingOrder = -1;
-
-                    currWallTile.GetComponent<SpriteRenderer>().sprite = cornerWallTile;
-                    currWallTile.GetComponent<BoxCollider2D>().enabled = false;
-                    currWallTile.AddComponent<PolygonCollider2D>();
-                    currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+                    currWallTile = createCornerWallTile(currWallTile);
 
                     currWallTile.gameObject.transform.Rotate(0, 0, 90);
                     changed = true;
@@ -578,10 +565,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    static GameObject createCornerWallTile(GameObject currWallTile)
+    {
+        currWallTile.GetComponent<BoxCollider2D>().enabled = false;
+        currWallTile.GetComponent<PolygonCollider2D>().enabled = true;
+        currWallTile.GetComponent<SpriteMask>().enabled = true;
+        currWallTile.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+//        currWallTile.GetComponent<SpriteRenderer>().color = Color.black;
+        return currWallTile;
+    }
+
     // need optimization for finding neighbours: a for loop for all the adjacent nodes
     static void smoothMap()
     {
-        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+//        GameObject[] mapTiles = GameObject.FindGameObjectsWithTag("Tile");
+
+        IComparer myComparer = new MapTilesComparer();
+
+        Array.Sort(mapTiles, myComparer);
 
         int floorTilesNum, x, y;
         foreach (GridNode node in regions[0])
@@ -589,60 +590,63 @@ public class GameManager : MonoBehaviour
             x = node.XCoordinateInGrid;
             y = node.ZCoordinateInGrid;
 
-            floorTilesNum = 0;
-
-            if (x + 1 < MapWidth)
+            if (mapTiles[y * MapWidth + x].layer == 9)
             {
-                if (mapTiles[y * MapWidth + (x + 1)].layer == 8)
-                    floorTilesNum++;
-            }
+                floorTilesNum = 0;
 
-            if (x - 1 >= 0)
-            {
-                if (mapTiles[y * MapWidth + (x - 1)] && mapTiles[y * MapWidth + (x - 1)].layer == 8)
-                    floorTilesNum++;
-            }
+                if (x + 1 < MapWidth)
+                {
+                    if (mapTiles[y * MapWidth + (x + 1)].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (y + 1 < MapHeight)
-            {
-                if (mapTiles[(y + 1) * MapWidth + x] && mapTiles[(y + 1) * MapWidth + x].layer == 8)
-                    floorTilesNum++;
-            }
+                if (x - 1 >= 0)
+                {
+                    if (mapTiles[y * MapWidth + (x - 1)] && mapTiles[y * MapWidth + (x - 1)].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (y - 1 >= 0)
-            {
-                if (mapTiles[(y - 1) * MapWidth + x] && mapTiles[(y - 1) * MapWidth + x].layer == 8)
-                    floorTilesNum++;
-            }
+                if (y + 1 < MapHeight)
+                {
+                    if (mapTiles[(y + 1) * MapWidth + x] && mapTiles[(y + 1) * MapWidth + x].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (x + 1 < MapWidth && y + 1 < MapHeight)
-            {
-                if (mapTiles[(y + 1) * MapWidth + (x + 1)] && mapTiles[(y + 1) * MapWidth + (x + 1)].layer == 8)
-                    floorTilesNum++;
-            }
+                if (y - 1 >= 0)
+                {
+                    if (mapTiles[(y - 1) * MapWidth + x] && mapTiles[(y - 1) * MapWidth + x].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (x - 1 >= 0 && y + 1 < MapHeight)
-            {
-                if (mapTiles[(y + 1) * MapWidth + (x - 1)] && mapTiles[(y + 1) * MapWidth + (x - 1)].layer == 8)
-                    floorTilesNum++;
-            }
+                if (x + 1 < MapWidth && y + 1 < MapHeight)
+                {
+                    if (mapTiles[(y + 1) * MapWidth + (x + 1)] && mapTiles[(y + 1) * MapWidth + (x + 1)].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (x + 1 < MapWidth && y - 1 >= 0)
-            {
-                if (mapTiles[(y - 1) * MapWidth + (x + 1)] && mapTiles[(y - 1) * MapWidth + (x + 1)].layer == 8)
-                    floorTilesNum++;
-            }
+                if (x - 1 >= 0 && y + 1 < MapHeight)
+                {
+                    if (mapTiles[(y + 1) * MapWidth + (x - 1)] && mapTiles[(y + 1) * MapWidth + (x - 1)].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (x - 1 >= 0 && y - 1 >= 0)
-            {
-                if (mapTiles[(y - 1) * MapWidth + (x - 1)] && mapTiles[(y - 1) * MapWidth + (x - 1)].layer == 8)
-                    floorTilesNum++;
-            }
+                if (x + 1 < MapWidth && y - 1 >= 0)
+                {
+                    if (mapTiles[(y - 1) * MapWidth + (x + 1)] && mapTiles[(y - 1) * MapWidth + (x + 1)].layer == 8)
+                        floorTilesNum++;
+                }
 
-            if (floorTilesNum >= 6)
-            {
-                DestroyImmediate(mapTiles[y * MapWidth + x]);
-                Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+                if (x - 1 >= 0 && y - 1 >= 0)
+                {
+                    if (mapTiles[(y - 1) * MapWidth + (x - 1)] && mapTiles[(y - 1) * MapWidth + (x - 1)].layer == 8)
+                        floorTilesNum++;
+                }
+
+                if (floorTilesNum >= 5)
+                {
+                    DestroyImmediate(mapTiles[y * MapWidth + x]);
+                    createFloorTile(x, y);
+                }
             }
         }
     }
@@ -677,10 +681,7 @@ public class GameManager : MonoBehaviour
                 DestroyImmediate(mapTiles[MapWidth * j + x]);
 
                 // instantiate the floor tile
-                GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
-                floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-                floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+                createFloorTile(x, j);
 //                floorTile.transform.SetSiblingIndex(index);
 
                 if (j == 0) // if it is the downmost node
@@ -715,10 +716,8 @@ public class GameManager : MonoBehaviour
             DestroyImmediate(mapTiles[MapWidth * j + x]);
 
             // instantiate the floor tile
-            GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
-            floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+            GameObject floorTile = createFloorTile(x, j);
 
-            floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
 //            floorTile.transform.SetSiblingIndex(index);
 
             if (j == MapHeight - 1) // if it is the upmost node
@@ -785,13 +784,7 @@ public class GameManager : MonoBehaviour
                             int index = mapTiles[MapWidth * y + x].transform.GetSiblingIndex();
                             // make the wall tile a floor tile
                             DestroyImmediate(mapTiles[MapWidth * y + x]);
-                            GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
-                            floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-
-                            floorTile.GetComponent<SpriteRenderer>().sprite =
-                                floorTiles[Random.Range(0, floorTiles.Length)];
-//                        floorTile.transform.SetSiblingIndex(index);
+                            createFloorTile(x, y);
                         }
                     }
                 }
@@ -807,12 +800,7 @@ public class GameManager : MonoBehaviour
 
                             int index = mapTiles[MapWidth * y + x].transform.GetSiblingIndex();
                             DestroyImmediate(mapTiles[MapWidth * y + x]);
-                            GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
-                            floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-
-                            floorTile.GetComponent<SpriteRenderer>().sprite =
-                                floorTiles[Random.Range(0, floorTiles.Length)];
-//                        floorTile.transform.SetSiblingIndex(index);
+                            GameObject floorTile = createFloorTile(x, y);
                         }
                     }
                 }
@@ -961,5 +949,15 @@ public class GameManager : MonoBehaviour
                 Quaternion.identity);
             hP.GetComponent<HealthPickup>().health = level + Random.Range(8, 15);
         }
+    }
+
+    public static GameObject createFloorTile(float x, float y)
+    {
+        GameObject floorTile = Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
+        floorTile.GetComponent<SpriteRenderer>().sprite = floorTiles[Random.Range(0, floorTiles.Length)];
+        floorTile.GetComponent<SpriteRenderer>().material = floorMaterial;
+        floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
+
+        return floorTile;
     }
 }

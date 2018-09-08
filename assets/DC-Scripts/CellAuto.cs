@@ -39,10 +39,7 @@ public class CellAuto : MonoBehaviour
 
                 if (mpHandler.Map[i, j] == 0)
                 {
-                    GameObject floorTile = Instantiate(floor, _position, Quaternion.identity);
-                    floorTile.transform.parent = GameObject.FindGameObjectWithTag("Map").transform;
-                    floorTile.GetComponent<SpriteRenderer>().sprite =
-                        floorTiles[Random.Range(0, floorTiles.Length)];
+                    GameManager.createFloorTile(i, j);
 
 //                    floorInstance.GetComponent<SpriteRenderer>().siz
 
